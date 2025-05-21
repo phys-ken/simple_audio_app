@@ -5,7 +5,7 @@
 
 ## 使い方
 
-[シンプル低周波発振器を開く](./teisyuha_buturikiso.html)
+[シンプル低周波発振器を開く](https://phys-ken.github.io/simple_audio_app/teisyuha_buturikiso.html)
 
 1. 各桁のボタンで周波数を調整
 2. スライダーで大まかな周波数を調整
