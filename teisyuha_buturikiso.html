@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シンプル低周波発振器</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .freq-btn {
+      width: 100%;
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+    .freq-display {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .digit {
+      display: inline-block;
+      width: 1.8rem;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      font-family: monospace;
+    }
+    .decimal-point {
+      display: inline-block;
+      width: 0.5rem;
+      text-align: center;
+    }
+    .digit-display {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      margin: 5px 0;
+      font-family: monospace;
+    }
+    .form-range {
+      height: 2rem;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .form-switch .form-check-input {
+      width: 3rem;
+      height: 1.5rem;
+      cursor: pointer;
+    }
+    .form-switch .form-check-label {
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: right;
+      font-size: 0.8rem;
+    }
+    @media (max-width: 576px) {
+      .freq-display {
+        font-size: 2rem;
+      }
+      .digit-display {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="text-center mb-4">シンプル低周波発振器</h1>
+        
+        <!-- 振動数表示 -->
+        <div class="freq-display">
+          <span id="digit5" class="digit">0</span>
+          <span id="digit4" class="digit">0</span>
+          <span id="digit3" class="digit">0</span>
+          <span id="digit2" class="digit">5</span>
+          <span id="digit1" class="digit">0</span>
+          <span class="decimal-point">.</span>
+          <span id="digit0" class="digit">0</span>
+          <span class="ms-2">Hz</span>
+        </div>
+
+        <!-- アップダウンボタン -->
+        <div class="row g-1 mb-4">
+          <!-- 10000の位 -->
+          <div class="col-2">
+            <button id="up5" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
+            <div id="display5" class="digit-display">0</div>
+            <button id="down5" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
+          </div>
+          <!-- 1000の位 -->
+          <div class="col-2">
+            <button id="up4" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
+            <div id="display4" class="digit-display">0</div>
+            <button id="down4" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
+          </div>
+          <!-- 100の位 -->
+          <div class="col-2">
+            <button id="up3" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
+            <div id="display3" class="digit-display">0</div>
+            <button id="down3" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
+          </div>
+          <!-- 10の位 -->
+          <div class="col-2">
+            <button id="up2" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
+            <div id="display2" class="digit-display">5</div>
+            <button id="down2" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
+          </div>
+          <!-- 1の位 -->
+          <div class="col-2">
+            <button id="up1" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
+            <div id="display1" class="digit-display">0</div>
+            <button id="down1" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
+          </div>
+          <!-- 0.1の位 -->
+          <div class="col-2">
+            <button id="up0" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
+            <div id="display0" class="digit-display">0</div>
+            <button id="down0" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
+          </div>
+        </div>
+
+        <!-- スライダー -->
+        <div class="row">
+          <div class="col-12">
+            <input type="range" class="form-range" id="freqSlider" min="1.0" max="20000.0" step="0.1" value="50.0">
+          </div>
+        </div>
+
+        <!-- ON/OFFスイッチ -->
+        <div class="toggle-container">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="soundToggle">
+            <label class="form-check-label ms-2" for="soundToggle">再生</label>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>シンプル低周波発振器 © <a href="https://note.com/phys_ken" target="_blank">phys-ken</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Audio コンテキストの作成
+      let audioContext;
+      let oscillator = null;
+      let gainNode = null;
+      let isPlaying = false;
+
+      // 振動数関連
+      let frequency = 50.0;
+      let waveType = 'sine';
+
+      // 要素の取得
+      const freqSlider = document.getElementById('freqSlider');
+      const soundToggle = document.getElementById('soundToggle');
+      
+      // 画面左→右の順で id を並べる
+      const digitIds = ['digit5','digit4','digit3','digit2','digit1','digit0'];
+      const displayIds = ['display5','display4','display3','display2','display1','display0'];
+      const upButtonIds = ['up5','up4','up3','up2','up1','up0'];
+      const downButtonIds = ['down5','down4','down3','down2','down1','down0'];
+      const multipliers = [10000, 1000, 100, 10, 1, 0.1]; // 各桁の重みを明示
+      
+      const digits = digitIds.map(id => document.getElementById(id));
+      const displayDigits = displayIds.map(id => document.getElementById(id));
+      const upButtons = upButtonIds.map(id => document.getElementById(id));
+      const downButtons = downButtonIds.map(id => document.getElementById(id));
+
+      // オーディオコンテキスト初期化
+      function initAudio() {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          gainNode = audioContext.createGain();
+          gainNode.gain.value = 1.0; // 最大音量
+          gainNode.connect(audioContext.destination);
+        } catch (e) {
+          console.error('Web Audio APIがサポートされていません:', e);
+          alert('お使いのブラウザはWeb Audio APIをサポートしていません。');
+        }
+      }
+
+      // 振動数表示の更新
+      function updateFrequencyDisplay() {
+        let freqString = frequency.toFixed(1);
+        // 必要に応じて先頭にゼロを追加
+        while (freqString.split('.')[0].length < 5) {
+          freqString = '0' + freqString;
+        }
+        
+        // 各桁の数字を更新
+        const allDigits = freqString.replace('.', '');
+        for (let i = 0; i <= 5; i++) {
+          digits[i].textContent = allDigits.charAt(i);
+          displayDigits[i].textContent = allDigits.charAt(i);
+        }
+
+        // スライダーも更新
+        freqSlider.value = frequency;
+      }
+
+      // オシレーターの更新または作成
+      function updateOscillator() {
+        if (isPlaying) {
+          if (oscillator) {
+            oscillator.stop();
+            oscillator.disconnect();
+          }
+          
+          oscillator = audioContext.createOscillator();
+          oscillator.type = waveType;
+          oscillator.frequency.value = frequency;
+          oscillator.connect(gainNode);
+          oscillator.start();
+        }
+      }
+
+      // 振動数の変更（桁ごとの加減）
+      function changeFrequency(position, delta) {
+        const multiplier = multipliers[position]; // 明示的な桁の重みを使用
+        let newFreq = frequency + (delta * multiplier);
+        
+        // 範囲チェック
+        if (newFreq < 1.0) newFreq = 1.0;
+        if (newFreq > 20000.0) newFreq = 20000.0;
+        
+        frequency = newFreq;
+        updateFrequencyDisplay();
+        
+        if (isPlaying) {
+          if (oscillator) {
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+          }
+        }
+      }
+
+      // サウンドのオン/オフ切り替え
+      function toggleSound() {
+        if (!audioContext) {
+          initAudio();
+        }
+        
+        isPlaying = soundToggle.checked;
+        
+        if (isPlaying) {
+          updateOscillator();
+        } else if (oscillator) {
+          oscillator.stop();
+          oscillator.disconnect();
+          oscillator = null;
+        }
+      }
+
+      // イベントリスナーの設定
+      upButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => changeFrequency(index, 1));
+      });
+
+      downButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => changeFrequency(index, -1));
+      });
+
+      freqSlider.addEventListener('input', () => {
+        frequency = parseFloat(freqSlider.value);
+        updateFrequencyDisplay();
+        if (isPlaying && oscillator) {
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        }
+      });
+
+      soundToggle.addEventListener('change', toggleSound);
+
+      // タッチイベントの最適化（ダブルタップズームの防止）
+      document.addEventListener('touchstart', (event) => {
+        if(event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      // 初期表示の更新
+      updateFrequencyDisplay();
+    });
+  </script>
+</body>
+</html>
