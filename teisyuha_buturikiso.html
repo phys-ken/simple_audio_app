@@ -4,307 +4,313 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>シンプル低周波発振器</title>
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    .freq-btn {
-      width: 100%;
+    body {
+      background: #b8ccd8;
+      min-height: 100vh;
+    }
+
+    /* 周波数パネル */
+    .freq-panel {
+      background: #1a2535;
+      border-radius: 10px;
+      padding: 10px 16px;
+      text-align: center;
+    }
+    .freq-int {
+      font-family: 'Courier New', monospace;
+      font-size: 2.4rem;
       font-weight: bold;
-      font-size: 1.5rem;
+      color: #4ade80;
+      letter-spacing: 0.1em;
     }
-    .freq-display {
-      font-size: 2.5rem;
+    .freq-dot {
+      font-family: 'Courier New', monospace;
+      font-size: 2rem;
       font-weight: bold;
-      text-align: center;
-      background-color: #f8f9fa;
-      border-radius: 5px;
-      padding: 10px;
-      margin: 10px 0;
+      color: #94a3b8;
+      margin: 0 2px;
     }
-    .digit {
-      display: inline-block;
-      width: 1.8rem;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-      font-family: monospace;
-    }
-    .decimal-point {
-      display: inline-block;
-      width: 0.5rem;
-      text-align: center;
-    }
-    .digit-display {
-      font-size: 1.8rem;
+    .freq-dec {
+      font-family: 'Courier New', monospace;
+      font-size: 2.4rem;
       font-weight: bold;
-      text-align: center;
-      width: 100%;
-      margin: 5px 0;
-      font-family: monospace;
+      color: #86efac;
+      letter-spacing: 0.1em;
     }
-    .form-range {
-      height: 2rem;
-      margin-top: 20px;
-      margin-bottom: 20px;
+    .freq-unit {
+      font-size: 1rem;
+      color: #64748b;
+      margin-left: 8px;
     }
-    .toggle-container {
+
+    /* 桁グリッド（行ベース） */
+    .digit-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .digit-row + .digit-row {
+      margin-top: 3px;
+    }
+    .cell {
+      flex: 1;
+      min-width: 0;
+    }
+    .dec-sep {
+      flex: 0 0 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 20px;
     }
-    .form-switch .form-check-input {
-      width: 3rem;
-      height: 1.5rem;
-      cursor: pointer;
+
+    /* ラベル */
+    .digit-label {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      padding: 2px 0;
     }
-    .form-switch .form-check-label {
-      font-size: 1.2rem;
-      cursor: pointer;
+
+    /* 桁表示 */
+    .digit-display {
+      width: 100%;
+      font-size: 2rem;
+      font-weight: bold;
+      font-family: monospace;
+      text-align: center;
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 0;
+      line-height: 1.2;
     }
-    .footer {
-      margin-top: 40px;
-      text-align: right;
-      font-size: 0.8rem;
+
+    /* 小数点ドット */
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: #334155;
+      border-radius: 50%;
     }
-    @media (max-width: 576px) {
-      .freq-display {
-        font-size: 2rem;
-      }
-      .digit-display {
-        font-size: 1.5rem;
-      }
+
+    /* 桁ボタン */
+    .freq-btn {
+      width: 100%;
+      padding: 9px 0;
+      font-size: 1rem;
+      touch-action: manipulation;
+    }
+
+    /* 再生/停止ボタン */
+    .play-btn {
+      font-size: 1.25rem;
+      padding: 13px 52px;
+      touch-action: manipulation;
+      min-width: 180px;
+    }
+
+    @media (max-width: 390px) {
+      .freq-int, .freq-dec { font-size: 1.7rem; letter-spacing: 0.05em; }
+      .freq-dot            { font-size: 1.4rem; }
+      .digit-display       { font-size: 1.45rem; }
+      .freq-btn            { font-size: 0.85rem; padding: 7px 0; }
+      .digit-label         { font-size: 0.6rem; }
+      .digit-row           { gap: 3px; }
+      .dec-sep             { flex: 0 0 10px; }
+      .dot                 { width: 7px; height: 7px; }
     }
   </style>
 </head>
 <body>
-  <div class="container mt-4">
-    <div class="row">
-      <div class="col-12">
-        <h1 class="text-center mb-4">シンプル低周波発振器</h1>
-        
-        <!-- 振動数表示 -->
-        <div class="freq-display">
-          <span id="digit5" class="digit">0</span>
-          <span id="digit4" class="digit">0</span>
-          <span id="digit3" class="digit">0</span>
-          <span id="digit2" class="digit">5</span>
-          <span id="digit1" class="digit">0</span>
-          <span class="decimal-point">.</span>
-          <span id="digit0" class="digit">0</span>
-          <span class="ms-2">Hz</span>
+  <div class="container py-3" style="max-width: 520px;">
+    <div class="card shadow rounded-3">
+      <div class="card-body px-3 py-4">
+
+        <h1 class="text-center mb-3 fw-bold" style="font-size: 1.25rem; color: #1a2535;">
+          シンプル低周波発振器
+        </h1>
+
+        <!-- 周波数パネル -->
+        <div class="freq-panel mb-3">
+          <span id="freq-int" class="freq-int">00050</span><span class="freq-dot">.</span><span id="freq-dec" class="freq-dec">0</span>
+          <span class="freq-unit">Hz</span>
         </div>
 
-        <!-- アップダウンボタン -->
-        <div class="row g-1 mb-4">
-          <!-- 10000の位 -->
-          <div class="col-2">
-            <button id="up5" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
-            <div id="display5" class="digit-display">0</div>
-            <button id="down5" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
-          </div>
-          <!-- 1000の位 -->
-          <div class="col-2">
-            <button id="up4" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
-            <div id="display4" class="digit-display">0</div>
-            <button id="down4" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
-          </div>
-          <!-- 100の位 -->
-          <div class="col-2">
-            <button id="up3" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
-            <div id="display3" class="digit-display">0</div>
-            <button id="down3" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
-          </div>
-          <!-- 10の位 -->
-          <div class="col-2">
-            <button id="up2" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
-            <div id="display2" class="digit-display">5</div>
-            <button id="down2" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
-          </div>
-          <!-- 1の位 -->
-          <div class="col-2">
-            <button id="up1" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
-            <div id="display1" class="digit-display">0</div>
-            <button id="down1" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
-          </div>
-          <!-- 0.1の位 -->
-          <div class="col-2">
-            <button id="up0" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button>
-            <div id="display0" class="digit-display">0</div>
-            <button id="down0" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button>
-          </div>
+        <!-- 桁グリッド -->
+
+        <!-- ラベル行 -->
+        <div class="digit-row mt-2">
+          <div class="cell digit-label">万</div>
+          <div class="cell digit-label">千</div>
+          <div class="cell digit-label">百</div>
+          <div class="cell digit-label">十</div>
+          <div class="cell digit-label">一</div>
+          <div class="dec-sep"></div>
+          <div class="cell digit-label">.1</div>
+        </div>
+
+        <!-- 上ボタン行 -->
+        <div class="digit-row">
+          <div class="cell"><button id="up5" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button></div>
+          <div class="cell"><button id="up4" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button></div>
+          <div class="cell"><button id="up3" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button></div>
+          <div class="cell"><button id="up2" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button></div>
+          <div class="cell"><button id="up1" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button></div>
+          <div class="dec-sep"></div>
+          <div class="cell"><button id="up0" class="btn btn-primary freq-btn"><i class="bi bi-caret-up-fill"></i></button></div>
+        </div>
+
+        <!-- 数字行（小数点ドット付き） -->
+        <div class="digit-row">
+          <div class="cell"><div id="display5" class="digit-display">0</div></div>
+          <div class="cell"><div id="display4" class="digit-display">0</div></div>
+          <div class="cell"><div id="display3" class="digit-display">0</div></div>
+          <div class="cell"><div id="display2" class="digit-display">5</div></div>
+          <div class="cell"><div id="display1" class="digit-display">0</div></div>
+          <div class="dec-sep"><div class="dot"></div></div>
+          <div class="cell"><div id="display0" class="digit-display">0</div></div>
+        </div>
+
+        <!-- 下ボタン行 -->
+        <div class="digit-row mb-4">
+          <div class="cell"><button id="down5" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button></div>
+          <div class="cell"><button id="down4" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button></div>
+          <div class="cell"><button id="down3" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button></div>
+          <div class="cell"><button id="down2" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button></div>
+          <div class="cell"><button id="down1" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button></div>
+          <div class="dec-sep"></div>
+          <div class="cell"><button id="down0" class="btn btn-primary freq-btn"><i class="bi bi-caret-down-fill"></i></button></div>
         </div>
 
         <!-- スライダー -->
-        <div class="row">
-          <div class="col-12">
-            <input type="range" class="form-range" id="freqSlider" min="1.0" max="20000.0" step="0.1" value="50.0">
+        <div class="mb-4">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>1 Hz</span>
+            <span>20,000 Hz</span>
           </div>
+          <input type="range" class="form-range" id="freqSlider" min="1.0" max="20000.0" step="0.1" value="50.0">
         </div>
 
-        <!-- ON/OFFスイッチ -->
-        <div class="toggle-container">
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="soundToggle">
-            <label class="form-check-label ms-2" for="soundToggle">再生</label>
-          </div>
+        <!-- 再生/停止ボタン -->
+        <div class="text-center mb-2">
+          <button id="playBtn" class="btn btn-success play-btn rounded-pill">
+            <i class="bi bi-play-fill"></i>&nbsp;再生
+          </button>
         </div>
 
-        <div class="footer">
-          <p>シンプル低周波発振器 © <a href="https://note.com/phys_ken" target="_blank">phys-ken</a></p>
+        <div class="text-end small text-muted mt-3">
+          シンプル低周波発振器 © <a href="https://note.com/phys_ken" target="_blank">phys-ken</a>
         </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Audio コンテキストの作成
       let audioContext;
       let oscillator = null;
       let gainNode = null;
       let isPlaying = false;
-
-      // 振動数関連
       let frequency = 50.0;
-      let waveType = 'sine';
+      const waveType = 'sine';
 
-      // 要素の取得
       const freqSlider = document.getElementById('freqSlider');
-      const soundToggle = document.getElementById('soundToggle');
-      
-      // 画面左→右の順で id を並べる
-      const digitIds = ['digit5','digit4','digit3','digit2','digit1','digit0'];
-      const displayIds = ['display5','display4','display3','display2','display1','display0'];
-      const upButtonIds = ['up5','up4','up3','up2','up1','up0'];
-      const downButtonIds = ['down5','down4','down3','down2','down1','down0'];
-      const multipliers = [10000, 1000, 100, 10, 1, 0.1]; // 各桁の重みを明示
-      
-      const digits = digitIds.map(id => document.getElementById(id));
-      const displayDigits = displayIds.map(id => document.getElementById(id));
-      const upButtons = upButtonIds.map(id => document.getElementById(id));
-      const downButtons = downButtonIds.map(id => document.getElementById(id));
+      const playBtn    = document.getElementById('playBtn');
+      const freqInt    = document.getElementById('freq-int');
+      const freqDec    = document.getElementById('freq-dec');
 
-      // オーディオコンテキスト初期化
+      const displayIds    = ['display5','display4','display3','display2','display1','display0'];
+      const upButtonIds   = ['up5','up4','up3','up2','up1','up0'];
+      const downButtonIds = ['down5','down4','down3','down2','down1','down0'];
+      const multipliers   = [10000, 1000, 100, 10, 1, 0.1];
+
+      const displayDigits = displayIds.map(id => document.getElementById(id));
+      const upButtons     = upButtonIds.map(id => document.getElementById(id));
+      const downButtons   = downButtonIds.map(id => document.getElementById(id));
+
       function initAudio() {
         try {
           audioContext = new (window.AudioContext || window.webkitAudioContext)();
           gainNode = audioContext.createGain();
-          gainNode.gain.value = 1.0; // 最大音量
+          gainNode.gain.value = 1.0;
           gainNode.connect(audioContext.destination);
         } catch (e) {
-          console.error('Web Audio APIがサポートされていません:', e);
           alert('お使いのブラウザはWeb Audio APIをサポートしていません。');
         }
       }
 
-      // 振動数表示の更新
       function updateFrequencyDisplay() {
-        let freqString = frequency.toFixed(1);
-        // 必要に応じて先頭にゼロを追加
-        while (freqString.split('.')[0].length < 5) {
-          freqString = '0' + freqString;
-        }
-        
-        // 各桁の数字を更新
-        const allDigits = freqString.replace('.', '');
-        for (let i = 0; i <= 5; i++) {
-          digits[i].textContent = allDigits.charAt(i);
-          displayDigits[i].textContent = allDigits.charAt(i);
-        }
+        const freqStr = frequency.toFixed(1);
+        const [intPart, decPart] = freqStr.split('.');
+        const paddedInt = intPart.padStart(5, '0');
 
-        // スライダーも更新
+        freqInt.textContent = paddedInt;
+        freqDec.textContent = decPart;
+
+        const chars = paddedInt + decPart;
+        for (let i = 0; i < 6; i++) displayDigits[i].textContent = chars.charAt(i);
+
         freqSlider.value = frequency;
       }
 
-      // オシレーターの更新または作成
       function updateOscillator() {
-        if (isPlaying) {
-          if (oscillator) {
-            oscillator.stop();
-            oscillator.disconnect();
-          }
-          
-          oscillator = audioContext.createOscillator();
-          oscillator.type = waveType;
-          oscillator.frequency.value = frequency;
-          oscillator.connect(gainNode);
-          oscillator.start();
-        }
+        if (oscillator) { oscillator.stop(); oscillator.disconnect(); }
+        oscillator = audioContext.createOscillator();
+        oscillator.type = waveType;
+        oscillator.frequency.value = frequency;
+        oscillator.connect(gainNode);
+        oscillator.start();
       }
 
-      // 振動数の変更（桁ごとの加減）
       function changeFrequency(position, delta) {
-        const multiplier = multipliers[position]; // 明示的な桁の重みを使用
-        let newFreq = frequency + (delta * multiplier);
-        
-        // 範囲チェック
-        if (newFreq < 1.0) newFreq = 1.0;
+        let newFreq = Math.round((frequency + delta * multipliers[position]) * 10) / 10;
+        if (newFreq < 1.0)     newFreq = 1.0;
         if (newFreq > 20000.0) newFreq = 20000.0;
-        
         frequency = newFreq;
         updateFrequencyDisplay();
-        
-        if (isPlaying) {
-          if (oscillator) {
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-          }
+        if (isPlaying && oscillator) {
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
         }
       }
 
-      // サウンドのオン/オフ切り替え
       function toggleSound() {
-        if (!audioContext) {
-          initAudio();
-        }
-        
-        isPlaying = soundToggle.checked;
-        
+        if (!audioContext) initAudio();
+        isPlaying = !isPlaying;
         if (isPlaying) {
           updateOscillator();
-        } else if (oscillator) {
-          oscillator.stop();
-          oscillator.disconnect();
-          oscillator = null;
+          playBtn.classList.replace('btn-success', 'btn-danger');
+          playBtn.innerHTML = '<i class="bi bi-stop-fill"></i>&nbsp;停止';
+        } else {
+          if (oscillator) { oscillator.stop(); oscillator.disconnect(); oscillator = null; }
+          playBtn.classList.replace('btn-danger', 'btn-success');
+          playBtn.innerHTML = '<i class="bi bi-play-fill"></i>&nbsp;再生';
         }
       }
 
-      // イベントリスナーの設定
-      upButtons.forEach((btn, index) => {
-        btn.addEventListener('click', () => changeFrequency(index, 1));
-      });
-
-      downButtons.forEach((btn, index) => {
-        btn.addEventListener('click', () => changeFrequency(index, -1));
-      });
+      upButtons.forEach((btn, i)   => btn.addEventListener('click', () => changeFrequency(i,  1)));
+      downButtons.forEach((btn, i) => btn.addEventListener('click', () => changeFrequency(i, -1)));
 
       freqSlider.addEventListener('input', () => {
-        frequency = parseFloat(freqSlider.value);
+        frequency = Math.round(parseFloat(freqSlider.value) * 10) / 10;
         updateFrequencyDisplay();
         if (isPlaying && oscillator) {
           oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
         }
       });
 
-      soundToggle.addEventListener('change', toggleSound);
+      playBtn.addEventListener('click', toggleSound);
 
-      // タッチイベントの最適化（ダブルタップズームの防止）
-      document.addEventListener('touchstart', (event) => {
-        if(event.touches.length > 1) {
-          event.preventDefault();
-        }
+      document.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) e.preventDefault();
       }, { passive: false });
+      document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
 
-      document.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-
-      // 初期表示の更新
       updateFrequencyDisplay();
     });
   </script>
