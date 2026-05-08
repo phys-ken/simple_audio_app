@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\croma\\\\Documents\\\\GitHub\\\\simple_audio_app\" -Recurse | Select-Object -Property FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\croma\\\\Documents\\\\GitHub\\\\simple_audio_app\"\\), \".\" } | Sort-Object)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\croma\\\\Documents\\\\GitHub\\\\simple_audio_app\" | Where-Object { !\\($_.Name -eq '.git' -or $_.Name -eq '.claude'\\) } | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}})",
+      "Bash(npm i *)",
+      "Bash(python -m http.server 8765)",
+      "Bash(git *)"
+    ]
+  }
+}
